@@ -7,6 +7,11 @@ import time
 import cv2
 
 
+def get_histogram():
+    with open("general_hand_histogram", "rb") as file:
+        histogram = pickle.load(file)
+    return histogram
+
 def create_db():
     if not os.path.exists("images"):
         os.makedirs("images")
@@ -43,27 +48,51 @@ def update_amount(name, new_amount):
     conn.execute("UPDATE migai SET amount == (?) WHERE name == (?)", (new_amount, name,))
     conn.commit()
 
+def transform(img, histogram):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = cv2.calcBackProject([img], [0, 1], histogram, [0, 180, 0, 256], 1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9,9))
+    cv2.filter2D(img,-1,kernel,img)
+    img = cv2.GaussianBlur(img, (9,9), 0)
+    img = cv2.medianBlur(img, 7)
+    img = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+    contours = cv2.findContours(img.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[0]
+    if len(contours) == 0:
+        return None
+    else:
+        max_contour = max(contours, key=cv2.contourArea)
+        return (img, max_contour)
+
 def take_images(init_pic_no, id):
     pic_no = init_pic_no
     total = pic_no + 25
     started = False
-    waiting = 50
+    waiting = 120
+    histogram = get_histogram()
+    ROI_top, ROI_bottom, ROI_right, ROI_left = 100, 300, 350, 550
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Failed to capture video")
         return
-    print("Press `x` to start or restart taking images")
-    while (True):
+    print("Press `x` to start or restart taking images, `z` to return")
+    while True:
         frame = cap.read()[1]
-        flip = cv2.flip(frame, 1)
-        gray = cv2.cvtColor(flip, cv2.COLOR_BGR2GRAY)
-        if started:
-            if waiting == 0:
-                cv2.imwrite("images/" + str(id) + "/" + str(pic_no) + ".jpg", gray)
-                pic_no += 1
-            else:
-                waiting -= 1
-        cv2.imshow("image", gray)
+        frame = cv2.flip(frame, 1)
+        roi = frame.copy()[ROI_top:ROI_bottom, ROI_right:ROI_left]
+        transformed = transform(roi, histogram)
+        cv2.rectangle(frame, (ROI_left, ROI_top), (ROI_right,ROI_bottom), (255,0,0), 2)
+        if transformed is not None:
+            transformed_img, contour = transformed
+            cv2.drawContours(frame, [contour + (ROI_right,ROI_top)], -1, (255, 0, 0),1)
+            cv2.imshow("transformed", transformed_img)
+            if started:
+                cv2.putText(frame, "Capturing...", (70, 45), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,0,), 2)
+                if waiting == 0:
+                    cv2.imwrite("images/" + str(id) + "/" + str(pic_no) + ".jpg", transformed_img)
+                    pic_no += 1
+                else:
+                    waiting -= 1
+        cv2.imshow("image", frame)
         key = cv2.waitKey(1)
         if key == ord('x'):
             if started:
@@ -74,6 +103,8 @@ def take_images(init_pic_no, id):
                 started = True
         if pic_no == total:
             update_amount(name, total)
+            return
+        if key == ord('z'):
             return
 
 
