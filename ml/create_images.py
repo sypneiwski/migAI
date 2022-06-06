@@ -65,7 +65,7 @@ def transform(img, histogram):
 
 def take_images(init_pic_no, id):
     pic_no = init_pic_no
-    total = pic_no + 25
+    total = pic_no + 250
     started = False
     waiting = 120
     histogram = get_histogram()
