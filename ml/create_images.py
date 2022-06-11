@@ -65,7 +65,7 @@ def transform(img, histogram):
 
 def take_images(init_pic_no, id):
     pic_no = init_pic_no
-    total = pic_no + 25 -1
+    total = pic_no + 250
     started = False
     waiting = 120
     histogram = get_histogram()
@@ -112,10 +112,13 @@ create_db()
 name = input("Gesture name:...")
 add_gesture(name)
 id = get_id(name)
-init_pic_no = get_amount(name) + 1
+init_pic_no = get_amount(name)
 
 if not os.path.exists("images/" + str(id)):
     os.makedirs("images/" + str(id));
 
 take_images(init_pic_no, id)
 
+total = get_amount(name)
+
+print("You now have ", total, " images of gesture ", name)
