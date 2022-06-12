@@ -20,7 +20,7 @@ app.add_middleware(
 async def root(data: UploadFile = Form(...)):
     print(data.filename, data.content_type)
     #Image.open(io.BytesIO(file_bytes)).show()
-    image = Image.open(data.file)
+    image = Image.open(data.file).transpose(Image.FLIP_LEFT_RIGHT)
     num_array = np.array(image)
     #for x in num_array:
     #    for y in  x:
