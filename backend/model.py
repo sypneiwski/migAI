@@ -33,9 +33,8 @@ def transform(img, histogram):
 def predict(img):
     # Get transformed image
     histogram = get_histogram()
-    cv2.imwrite("./test.jpg", img)
     transformed = transform(img, histogram)
-    #cv2.imwrite("./test.jpg", transformed)
+    cv2.imwrite("./test.jpg", transformed)
 
     # Get model
     model = ConvNet()
@@ -48,16 +47,16 @@ def predict(img):
     # Get database
     conn = sqlite3.connect("../ml/migai_db.db")
 
-    # # Get tensor from image
-    # tensor = ToTensor(Image.open("test.jpg").convert("RGB"))
-    # input = torch.unsqueeze(img, 0)
+    # Get tensor from image
+    transformation = ToTensor()
+    tensor = transformation(Image.open("test.jpg").convert("RGB"))
+    input = torch.unsqueeze(tensor, 0)
 
-    # # Get prediction
-    # output = model(input)
-    # _, predicted = torch.max(output.data, 1)
-    # prediction = conn.execute("SELECT name FROM migai WHERE id == (?)", (idx_to_class[predicted.item()],)).fetchall()[0]
-    # print(type(prediction))
-    # print("prediction : " + str(prediction))
-    # return prediction
-    return "X"
+    # Get prediction
+    output = model(input)
+    _, predicted = torch.max(output.data, 1)
+    prediction = conn.execute("SELECT name FROM migai WHERE id == (?)", (idx_to_class[predicted.item()],)).fetchall()[0]
+    print(type(prediction))
+    print("prediction : " + str(prediction))
+    return prediction
 
