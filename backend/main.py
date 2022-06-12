@@ -2,7 +2,7 @@ from fastapi import FastAPI, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import numpy as np
-from model import test
+from model import predict
 
 app = FastAPI()
 
@@ -30,4 +30,4 @@ async def root(data: UploadFile = Form(...)):
     
     #image_test = Image.fromarray(num_array)
     #image_test.show()
-    return {"result": test(num_array)}
+    return {"result": predict(num_array)}
