@@ -4,9 +4,10 @@ import torch.nn.functional as F
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 import numpy as np
+import pickle
 
 # Meta-parameters
-epochs = 10
+epochs = 5
 batch_size = 16
 learning_rate = 0.001
 
@@ -19,6 +20,11 @@ print(test_data)
 trainloader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 testloader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
+idx_to_class = {v: k for k, v in train_data.class_to_idx.items()}
+with open("idx_to_class", "wb") as file:
+    pickle.dump(idx_to_class, file)
+
+
 class ConvNet(nn.Module):
     def __init__(self):
         super(ConvNet, self).__init__()
@@ -27,8 +33,7 @@ class ConvNet(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.conv3 = nn.Conv2d(16, 32, 6)
         self.fc1 = nn.Linear(32*21*21, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 22)
+        self.fc2 = nn.Linear(120, 22)
 
     def forward(self, x):
         # Convolutional and pooling layers
@@ -39,8 +44,7 @@ class ConvNet(nn.Module):
         x = torch.flatten(x, 1)
         # Fully connected layers
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = self.fc2(x)
         return x
 
 
@@ -72,6 +76,7 @@ torch.save(model.state_dict(), './model.pth')
 
 correct = 0
 total = 0
+model.eval()
 with torch.no_grad():
     for data in testloader:
         images, labels = data
