@@ -38,10 +38,11 @@
 			canvas_work.width = CAMERA_WIDTH
 			canvas_work.height = CAMERA_HEIGHT
 			let ctx = canvas_work.getContext('2d')
-			ctx.setTransform(-1,0,0,1,canvas.width,0)
+			//ctx.setTransform(-1,0,0,1,canvas.width,0)
 			ctx.drawImage(video, 0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-			let image_data =  canvas_work.getContext('2d').getImageData(img_x, img_y, img_w, img_h);
-			canvas.getContext('2d').putImageData(image_data, 0, 0);
+			let image_data =  ctx.getImageData(100, 100, 200, 200);
+			let ctx_can = canvas.getContext('2d')			
+			ctx_can.putImageData(image_data, 0, 0);
 		}
 
 		const getResult = () => {
@@ -180,6 +181,10 @@
 </section>
 
 <style>
+	#canvas {
+		transform: scaleX(-1);
+		visibility: hidden;
+	}
 	#video {
 		transform: scaleX(-1);
 		z-index: -1;

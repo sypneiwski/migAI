@@ -19,6 +19,6 @@ app.add_middleware(
 @app.post('/')
 async def root(data: UploadFile = Form(...)):
     print(data.filename, data.content_type)
-    image = Image.open(data.file)
+    image = Image.open(data.file).transpose(Image.FLIP_LEFT_RIGHT)
     num_array = np.array(image)
     return {"result": predict(num_array)}
