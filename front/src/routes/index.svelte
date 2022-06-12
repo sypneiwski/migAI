@@ -51,7 +51,7 @@
 				axios.post('http://localhost:8000/', data,{
 				headers: {'Content-Type': 'multipart/form-data'}})
 					.then(res => result += res.data.result)
-			})
+			}, 'image/jpeg')
 		}
 
 		const startPhotos = seconds => () => {
@@ -175,7 +175,7 @@
 	<button id="clear" on:click={() => result = "Result: "}>Clear</button>
 	</div>
 	<p id="result" bind:textContent="{result}" contenteditable in:fly="{{ y: 200, duration: 2000 }}"></p>
-	<canvas id="canvas" width={CAMERA_WIDTH} height={CAMERA_HEIGHT}></canvas>
+	<canvas id="canvas" width={200} height={200}></canvas>
 	<ProgressBar bind:this={progress} width="100vw" color="#D01B1B"/>
 </section>
 
