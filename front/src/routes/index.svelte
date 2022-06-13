@@ -52,7 +52,7 @@
 				axios.post('http://localhost:8000/', data,{
 				headers: {'Content-Type': 'multipart/form-data'}})
 					.then(res => result += res.data.result)
-			}, 'image/jpeg')
+			}, 'image/jpeg', 1)
 		}
 
 		const startPhotos = seconds => () => {
@@ -161,6 +161,7 @@
 		<p>-show the sign in front of your camera and make sure it is placed inside the selected area</p>
 		<p>-click one of the buttons to make photo once or every fixed amount of seconds</p>
 		<p>-the computed result will appear next to the 'Result' label</p>
+    <p>-if you make a mistake, you can edit the rendered result manually</p>
 		<button id='close-modal'>Close</button>
 	</div>
 	<canvas id="video-canvas" width={CAMERA_WIDTH} height={CAMERA_HEIGHT}></canvas>

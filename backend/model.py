@@ -33,6 +33,7 @@ def transform(img, histogram):
 def predict(img):
     # Get transformed image
     histogram = get_histogram()
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     transformed = transform(img, histogram)
     cv2.imwrite("./test.jpg", transformed)
 
