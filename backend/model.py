@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import pickle
 import sqlite3
-from training_model import ConvNet
+from define_model import ConvNet
 from PIL import Image
 from torchvision.transforms import ToTensor
 
@@ -12,6 +12,11 @@ def get_histogram():
     with open("../ml/general_hand_histogram", "rb") as file:
         histogram = pickle.load(file)
     return histogram
+
+def get_descriptions():
+    with open("idx_to_class", "rb") as file:
+        idx_to_class = pickle.load(file)
+    return idx_to_class
 
 
 def transform(img, histogram):
@@ -29,29 +34,29 @@ def predict(img):
     # Get transformed image
     histogram = get_histogram()
     transformed = transform(img, histogram)
-    cv2.imwrite("test.jpg", transformed)
-
-    # delete later
-    xxx = datasets.ImageFolder("../ml/val/", transform=ToTensor())
-    idx_to_class = {v: k for k, v in xxx.class_to_idx.items()}
+    cv2.imwrite("./test.jpg", transformed)
 
     # Get model
     model = ConvNet()
     model.load_state_dict(torch.load("model.pth"))
     model.eval()
 
+    # Get class descriptions
+    idx_to_class = get_descriptions()
+
     # Get database
     conn = sqlite3.connect("../ml/migai_db.db")
 
     # Get tensor from image
-    tensor = ToTensor(Image.open("test.jpg").convert("RGB"))
-    input = torch.unsqueeze(img, 0)
+    transformation = ToTensor()
+    tensor = transformation(Image.open("test.jpg").convert("RGB"))
+    input = torch.unsqueeze(tensor, 0)
 
     # Get prediction
     output = model(input)
     _, predicted = torch.max(output.data, 1)
     prediction = conn.execute("SELECT name FROM migai WHERE id == (?)", (idx_to_class[predicted.item()],)).fetchall()[0]
-    print(prediction)
+    print(type(prediction))
+    print("prediction : " + str(prediction))
     return prediction
-
 
