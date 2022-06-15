@@ -10,7 +10,7 @@
 	import {onMount} from 'svelte';
 	let progress;
 	let shouldStop = false;
-	let result = "Result: ";
+	let result = "";
 	onMount(async function() {
 		const img_x = 350
 		const img_y = 100
@@ -174,14 +174,23 @@
 	</div>
 	<div class="flex">
 	<button id="stop">Stop</button>
-	<button id="clear" on:click={() => result = "Result: "}>Clear</button>
+	<button id="clear" on:click={() => result = ""}>Clear</button>
+	<button id="pop" on:click={() => {
+		if (result.length > 0) result = result.slice(0 ,-1);
+		}}>Remove last sign</button>
 	</div>
-	<p id="result" bind:textContent="{result}" contenteditable in:fly="{{ y: 200, duration: 2000 }}"></p>
+	<div style="margin-top:30px">
+	<p class="inline">Result: </p>
+	<p id="result" class="inline" bind:textContent="{result}" contenteditable in:fly="{{ y: 200, duration: 2000 }}"></p>
+	</div>
 	<canvas id="canvas" width={200} height={200}></canvas>
 	<ProgressBar bind:this={progress} width="100vw" color="#D01B1B"/>
 </section>
 
 <style>
+	.inline {
+		display: inline;
+	}
 	#canvas {
 		transform: scaleX(-1);
 		visibility: hidden;
